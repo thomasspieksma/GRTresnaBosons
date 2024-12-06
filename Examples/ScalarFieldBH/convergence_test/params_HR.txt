@@ -24,7 +24,7 @@ output_filename = InitialDataFinal.3d.hdf5
 # diagnostic_interval = 10
 
 # Output for tracking convergence of the errors
-error_filename = Ham_and_Mom_errors
+error_filename = Ham_and_Mom_errors_HR
 
 #################################################
 # Grid parameters
