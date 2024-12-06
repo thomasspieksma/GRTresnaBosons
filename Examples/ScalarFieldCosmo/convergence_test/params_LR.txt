@@ -16,7 +16,6 @@ output_filename = InitialDataFinal.3d.hdf5
 
 # Path for processor outputs and verbosity
 # pout_path = pout/
-# pout_filename = pout
 # verbosity = 1
 
 # Frequency of writing diagnostic files at non linear iterations
