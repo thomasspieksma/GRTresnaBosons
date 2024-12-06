@@ -1,12 +1,7 @@
-#ifdef CH_LANG_CC
-/*
- *      _______              __
- *     / ___/ /  ___  __ _  / /  ___
- *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
- *    \___/_//_/\___/_/_/_/_.__/\___/
- *    Please refer to Copyright.txt, in Chombo's root directory.
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
  */
-#endif
 
 #include "SetBCs.H"
 #include "AMRIO.H"
@@ -16,6 +11,7 @@
 #include "BoxIterator.H"
 #include "CONSTANTS.H"
 #include "CoarseAverage.H"
+#include "ConstraintVariables.hpp"
 #include "GRParmParse.hpp"
 #include "LoadBalance.H"
 #include "computeNorm.H"
@@ -48,14 +44,14 @@ void ParseBC(FArrayBox &a_state, const Box &a_valid,
         // this will populate the multigrid boundaries according to the BCs
         // in particular it will fill cells for Aij, and updated K
         solver_boundaries.fill_constraint_box(Side::Lo, a_state,
-                                              Interval(c_psi, c_U));
+                                              Interval(0, NUM_CONSTRAINT_VARS));
         solver_boundaries.fill_constraint_box(Side::Hi, a_state,
-                                              Interval(c_psi, c_U));
+                                              Interval(0, NUM_CONSTRAINT_VARS));
         // Do it twice to catch corners... must be a better way
         // but for now this works
         solver_boundaries.fill_constraint_box(Side::Lo, a_state,
-                                              Interval(c_psi, c_U));
+                                              Interval(0, NUM_CONSTRAINT_VARS));
         solver_boundaries.fill_constraint_box(Side::Hi, a_state,
-                                              Interval(c_psi, c_U));
+                                              Interval(0, NUM_CONSTRAINT_VARS));
     }
 }

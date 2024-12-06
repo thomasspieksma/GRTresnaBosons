@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #include "PsiAndAijFunctions.hpp"
 #include "REAL.H"
 #include "RealVect.H"
@@ -5,11 +10,11 @@
 #include "TensorAlgebra.hpp"
 
 void PsiAndAijFunctions::read_params(GRParmParse &pp,
-                                     params_t &a_psi_and_Aij_functions_params)
+                                     params_t &a_psi_and_Aij_params)
 {
     // Initial conditions for the black holes
-    pp.get("bh1_bare_mass", a_psi_and_Aij_functions_params.bh1_bare_mass);
-    pp.get("bh2_bare_mass", a_psi_and_Aij_functions_params.bh2_bare_mass);
+    pp.get("bh1_bare_mass", a_psi_and_Aij_params.bh1_bare_mass);
+    pp.get("bh2_bare_mass", a_psi_and_Aij_params.bh2_bare_mass);
     std::vector<double> temp_spin1(SpaceDim);
     std::vector<double> temp_spin2(SpaceDim);
     std::vector<double> temp_offset1(SpaceDim);
@@ -24,24 +29,24 @@ void PsiAndAijFunctions::read_params(GRParmParse &pp,
     pp.getarr("bh2_momentum", temp_mom2, 0, SpaceDim);
     for (int idir = 0; idir < SpaceDim; idir++)
     {
-        a_psi_and_Aij_functions_params.bh1_spin[idir] = temp_spin1[idir];
-        a_psi_and_Aij_functions_params.bh2_spin[idir] = temp_spin2[idir];
-        a_psi_and_Aij_functions_params.bh1_offset[idir] = temp_offset1[idir];
-        a_psi_and_Aij_functions_params.bh2_offset[idir] = temp_offset2[idir];
-        a_psi_and_Aij_functions_params.bh1_momentum[idir] = temp_mom1[idir];
-        a_psi_and_Aij_functions_params.bh2_momentum[idir] = temp_mom2[idir];
+        a_psi_and_Aij_params.bh1_spin[idir] = temp_spin1[idir];
+        a_psi_and_Aij_params.bh2_spin[idir] = temp_spin2[idir];
+        a_psi_and_Aij_params.bh1_offset[idir] = temp_offset1[idir];
+        a_psi_and_Aij_params.bh2_offset[idir] = temp_offset2[idir];
+        a_psi_and_Aij_params.bh1_momentum[idir] = temp_mom1[idir];
+        a_psi_and_Aij_params.bh2_momentum[idir] = temp_mom2[idir];
     }
 
-    if (abs(a_psi_and_Aij_functions_params.bh1_bare_mass) > 0.0 ||
-        abs(a_psi_and_Aij_functions_params.bh2_bare_mass) > 0.0)
+    if (abs(a_psi_and_Aij_params.bh1_bare_mass) > 0.0 ||
+        abs(a_psi_and_Aij_params.bh2_bare_mass) > 0.0)
     {
         pout() << "Spacetime contains black holes with bare masses "
-               << a_psi_and_Aij_functions_params.bh1_bare_mass << " and "
-               << a_psi_and_Aij_functions_params.bh2_bare_mass << endl;
+               << a_psi_and_Aij_params.bh1_bare_mass << " and "
+               << a_psi_and_Aij_params.bh2_bare_mass << endl;
     }
 
-    pp.get("use_compact_Vi_ansatz",
-           a_psi_and_Aij_functions_params.use_compact_Vi_ansatz, false);
+    pp.get("use_compact_Vi_ansatz", a_psi_and_Aij_params.use_compact_Vi_ansatz,
+           false);
 }
 
 void PsiAndAijFunctions::get_bh_coords(Real &bh_radius, RealVect &loc_bh,
@@ -60,19 +65,17 @@ void PsiAndAijFunctions::get_bh_coords(Real &bh_radius, RealVect &loc_bh,
 Real PsiAndAijFunctions::compute_bowenyork_psi(const RealVect &loc)
 {
     // the Bowen York params
-    Real m1 = m_psi_and_Aij_functions_params.bh1_bare_mass;
-    Real m2 = m_psi_and_Aij_functions_params.bh2_bare_mass;
+    Real m1 = m_psi_and_Aij_params.bh1_bare_mass;
+    Real m2 = m_psi_and_Aij_params.bh2_bare_mass;
 
     // set the BH values - location
     RealVect loc_bh1;
     Real rbh1;
-    get_bh_coords(rbh1, loc_bh1, loc,
-                  m_psi_and_Aij_functions_params.bh1_offset);
+    get_bh_coords(rbh1, loc_bh1, loc, m_psi_and_Aij_params.bh1_offset);
 
     RealVect loc_bh2;
     Real rbh2;
-    get_bh_coords(rbh2, loc_bh2, loc,
-                  m_psi_and_Aij_functions_params.bh2_offset);
+    get_bh_coords(rbh2, loc_bh2, loc, m_psi_and_Aij_params.bh2_offset);
 
     return 0.5 * (m1 / rbh1 + m2 / rbh2);
 }
@@ -86,22 +89,20 @@ void PsiAndAijFunctions::compute_bowenyork_Aij(
     // set the BH values - location
     RealVect loc_bh1;
     Real rbh1;
-    get_bh_coords(rbh1, loc_bh1, loc,
-                  m_psi_and_Aij_functions_params.bh1_offset);
+    get_bh_coords(rbh1, loc_bh1, loc, m_psi_and_Aij_params.bh1_offset);
 
     RealVect loc_bh2;
     Real rbh2;
-    get_bh_coords(rbh2, loc_bh2, loc,
-                  m_psi_and_Aij_functions_params.bh2_offset);
+    get_bh_coords(rbh2, loc_bh2, loc, m_psi_and_Aij_params.bh2_offset);
 
     RealVect n1 = {loc_bh1[0] / rbh1, loc_bh1[1] / rbh1, loc_bh1[2] / rbh1};
     RealVect n2 = {loc_bh2[0] / rbh2, loc_bh2[1] / rbh2, loc_bh2[2] / rbh2};
 
     // the Bowen York params
-    RealVect J1 = m_psi_and_Aij_functions_params.bh1_spin;
-    RealVect J2 = m_psi_and_Aij_functions_params.bh2_spin;
-    RealVect P1 = m_psi_and_Aij_functions_params.bh1_momentum;
-    RealVect P2 = m_psi_and_Aij_functions_params.bh2_momentum;
+    RealVect J1 = m_psi_and_Aij_params.bh1_spin;
+    RealVect J2 = m_psi_and_Aij_params.bh2_spin;
+    RealVect P1 = m_psi_and_Aij_params.bh1_momentum;
+    RealVect P2 = m_psi_and_Aij_params.bh2_momentum;
 
     using namespace TensorAlgebra;
     Tensor<3, Real> epsilon = TensorAlgebra::epsilon();
@@ -152,10 +153,10 @@ void PsiAndAijFunctions::compute_ctt_Aij(Tensor<2, Real> &Aij,
     derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
                          Interval(c_V1_0, c_V3_0));
 
-    // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using this U
-    // when constructing Aij. Non-periodic: Compact ansatz B.7 in B&S (p547)
+    // Periodic: Use ansatz B.3 in B&S (p547)
+    // Non-periodic: Compact ansatz B.7 in B&S (p547)
     Real trace = 0.0;
-    if (!m_psi_and_Aij_functions_params.use_compact_Vi_ansatz)
+    if (!m_psi_and_Aij_params.use_compact_Vi_ansatz)
     {
         FOR1(i) { trace += d1_Vi[i][i] + d2_U[i][i]; }
 

@@ -1,6 +1,12 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef MATTERPARAMS_HPP_
 #define MATTERPARAMS_HPP_
 
+#include "GRParmParse.hpp"
 #include "REAL.H"
 
 namespace MatterParams

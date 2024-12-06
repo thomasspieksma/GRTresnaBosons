@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #include "ScalarField.hpp"
 
 Real ScalarField::my_potential_function(const Real &phi_here) const

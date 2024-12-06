@@ -27,27 +27,27 @@
 
 // This file implements the key functions for the multi grid methods
 
-void VariableCoeffPoissonOperator::residualI(LevelData<FArrayBox> &a_lhs,
-                                             const LevelData<FArrayBox> &a_dpsi,
-                                             const LevelData<FArrayBox> &a_rhs,
-                                             bool a_homogeneous)
+void VariableCoeffPoissonOperator::residualI(
+    LevelData<FArrayBox> &a_lhs, const LevelData<FArrayBox> &a_constraint_vars,
+    const LevelData<FArrayBox> &a_rhs, bool a_homogeneous)
 {
     CH_TIME("VariableCoeffPoissonOperator::residualI");
 
-    LevelData<FArrayBox> &dpsi = (LevelData<FArrayBox> &)a_dpsi;
+    LevelData<FArrayBox> &constraint_vars =
+        (LevelData<FArrayBox> &)a_constraint_vars;
     Real dx = m_dx;
     const DisjointBoxLayout &dbl = a_lhs.disjointBoxLayout();
-    DataIterator dit = dpsi.dataIterator();
+    DataIterator dit = constraint_vars.dataIterator();
     {
         CH_TIME("VariableCoeffPoissonOperator::residualIBC");
 
         for (dit.begin(); dit.ok(); ++dit)
         {
-            m_bc(dpsi[dit], dbl[dit()], m_domain, dx, a_homogeneous);
+            m_bc(constraint_vars[dit], dbl[dit()], m_domain, dx, a_homogeneous);
         }
     }
 
-    dpsi.exchange(dpsi.interval(), m_exchangeCopier);
+    constraint_vars.exchange(constraint_vars.interval(), m_exchangeCopier);
 
     for (dit.begin(); dit.ok(); ++dit)
     {
@@ -62,7 +62,7 @@ void VariableCoeffPoissonOperator::residualI(LevelData<FArrayBox> &a_lhs,
 #else
         This_will_not_compile !
 #endif
-            (CHF_FRA(a_lhs[dit]), CHF_CONST_FRA(dpsi[dit]),
+            (CHF_FRA(a_lhs[dit]), CHF_CONST_FRA(constraint_vars[dit]),
              CHF_CONST_FRA(a_rhs[dit]), CHF_CONST_REAL(m_alpha),
              CHF_CONST_FRA((*m_aCoef)[dit]), CHF_CONST_REAL(m_beta),
              CHF_CONST_FRA((*m_bCoef)[dit]), CHF_BOX(region),
@@ -70,11 +70,11 @@ void VariableCoeffPoissonOperator::residualI(LevelData<FArrayBox> &a_lhs,
     } // end loop over boxes
 }
 
-// this preconditioner first initializes dpsihat to (IA)dpsihat = rhshat
-// (diagonization of L -- A is the matrix version of L)
-// then smooths with a couple of passes of levelGSRB
-void VariableCoeffPoissonOperator::preCond(LevelData<FArrayBox> &a_dpsi,
-                                           const LevelData<FArrayBox> &a_rhs)
+// this preconditioner first initializes constraint_varshat to
+// (IA)constraint_varshat = rhshat (diagonization of L -- A is the matrix
+// version of L) then smooths with a couple of passes of levelGSRB
+void VariableCoeffPoissonOperator::preCond(
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
     CH_TIME("VariableCoeffPoissonOperator::preCond");
 
@@ -85,7 +85,7 @@ void VariableCoeffPoissonOperator::preCond(LevelData<FArrayBox> &a_dpsi,
     //
     // The inverse of this is our initial multiplier.
 
-    int ncomp = a_dpsi.nComp();
+    int ncomp = a_constraint_vars.nComp();
 
     CH_assert(m_lambda.isDefined());
     CH_assert(a_rhs.nComp() == ncomp);
@@ -95,49 +95,51 @@ void VariableCoeffPoissonOperator::preCond(LevelData<FArrayBox> &a_dpsi,
     resetLambda();
 
     // don't need to use a Copier -- plain copy will do
-    DataIterator dit = a_dpsi.dataIterator();
+    DataIterator dit = a_constraint_vars.dataIterator();
     for (dit.begin(); dit.ok(); ++dit)
     {
         // also need to average and sum face-centered bCoefs to cell-centers
         Box gridBox = a_rhs[dit].box();
 
         // approximate inverse
-        a_dpsi[dit].copy(a_rhs[dit]);
-        a_dpsi[dit].mult(m_lambda[dit], gridBox, 0, 0, ncomp);
+        a_constraint_vars[dit].copy(a_rhs[dit]);
+        a_constraint_vars[dit].mult(m_lambda[dit], gridBox, 0, 0, ncomp);
     }
 
-    relax(a_dpsi, a_rhs, 2);
+    relax(a_constraint_vars, a_rhs, 2);
 }
 
-void VariableCoeffPoissonOperator::applyOpI(LevelData<FArrayBox> &a_lhs,
-                                            const LevelData<FArrayBox> &a_dpsi,
-                                            bool a_homogeneous)
+void VariableCoeffPoissonOperator::applyOpI(
+    LevelData<FArrayBox> &a_lhs, const LevelData<FArrayBox> &a_constraint_vars,
+    bool a_homogeneous)
 {
     CH_TIME("VariableCoeffPoissonOperator::applyOpI");
-    LevelData<FArrayBox> &dpsi = (LevelData<FArrayBox> &)a_dpsi;
+    LevelData<FArrayBox> &constraint_vars =
+        (LevelData<FArrayBox> &)a_constraint_vars;
     Real dx = m_dx;
     const DisjointBoxLayout &dbl = a_lhs.disjointBoxLayout();
-    DataIterator dit = dpsi.dataIterator();
+    DataIterator dit = constraint_vars.dataIterator();
 
     for (dit.begin(); dit.ok(); ++dit)
     {
-        m_bc(dpsi[dit], dbl[dit()], m_domain, dx, a_homogeneous);
+        m_bc(constraint_vars[dit], dbl[dit()], m_domain, dx, a_homogeneous);
     }
 
-    applyOpNoBoundary(a_lhs, a_dpsi);
+    applyOpNoBoundary(a_lhs, a_constraint_vars);
 }
 
 void VariableCoeffPoissonOperator::applyOpNoBoundary(
-    LevelData<FArrayBox> &a_lhs, const LevelData<FArrayBox> &a_dpsi)
+    LevelData<FArrayBox> &a_lhs, const LevelData<FArrayBox> &a_constraint_vars)
 {
     CH_TIME("VariableCoeffPoissonOperator::applyOpNoBoundary");
 
-    LevelData<FArrayBox> &dpsi = (LevelData<FArrayBox> &)a_dpsi;
+    LevelData<FArrayBox> &constraint_vars =
+        (LevelData<FArrayBox> &)a_constraint_vars;
 
     const DisjointBoxLayout &dbl = a_lhs.disjointBoxLayout();
-    DataIterator dit = dpsi.dataIterator();
+    DataIterator dit = constraint_vars.dataIterator();
 
-    dpsi.exchange(dpsi.interval(), m_exchangeCopier);
+    constraint_vars.exchange(constraint_vars.interval(), m_exchangeCopier);
 
     for (dit.begin(); dit.ok(); ++dit)
     {
@@ -152,7 +154,7 @@ void VariableCoeffPoissonOperator::applyOpNoBoundary(
 #else
         This_will_not_compile !
 #endif
-            (CHF_FRA(a_lhs[dit]), CHF_CONST_FRA(dpsi[dit]),
+            (CHF_FRA(a_lhs[dit]), CHF_CONST_FRA(constraint_vars[dit]),
              CHF_CONST_REAL(m_alpha), CHF_CONST_FRA((*m_aCoef)[dit]),
              CHF_CONST_REAL(m_beta), CHF_CONST_FRA((*m_bCoef)[dit]),
              CHF_BOX(region), CHF_CONST_REAL(m_dx));
@@ -160,24 +162,29 @@ void VariableCoeffPoissonOperator::applyOpNoBoundary(
 }
 
 void VariableCoeffPoissonOperator::restrictResidual(
-    LevelData<FArrayBox> &a_resCoarse, LevelData<FArrayBox> &a_dpsiFine,
+    LevelData<FArrayBox> &a_resCoarse,
+    LevelData<FArrayBox> &a_constraint_varsFine,
     const LevelData<FArrayBox> &a_rhsFine)
 {
     CH_TIME("VariableCoeffPoissonOperator::restrictResidual");
 
-    homogeneousCFInterp(a_dpsiFine);
-    const DisjointBoxLayout &dblFine = a_dpsiFine.disjointBoxLayout();
-    for (DataIterator dit = a_dpsiFine.dataIterator(); dit.ok(); ++dit)
+    homogeneousCFInterp(a_constraint_varsFine);
+    const DisjointBoxLayout &dblFine =
+        a_constraint_varsFine.disjointBoxLayout();
+    for (DataIterator dit = a_constraint_varsFine.dataIterator(); dit.ok();
+         ++dit)
     {
-        FArrayBox &dpsi = a_dpsiFine[dit];
-        m_bc(dpsi, dblFine[dit()], m_domain, m_dx, true);
+        FArrayBox &constraint_vars = a_constraint_varsFine[dit];
+        m_bc(constraint_vars, dblFine[dit()], m_domain, m_dx, true);
     }
 
-    a_dpsiFine.exchange(a_dpsiFine.interval(), m_exchangeCopier);
+    a_constraint_varsFine.exchange(a_constraint_varsFine.interval(),
+                                   m_exchangeCopier);
 
-    for (DataIterator dit = a_dpsiFine.dataIterator(); dit.ok(); ++dit)
+    for (DataIterator dit = a_constraint_varsFine.dataIterator(); dit.ok();
+         ++dit)
     {
-        FArrayBox &dpsi = a_dpsiFine[dit];
+        FArrayBox &constraint_vars = a_constraint_varsFine[dit];
         const FArrayBox &rhs = a_rhsFine[dit];
         FArrayBox &res = a_resCoarse[dit];
 
@@ -199,7 +206,7 @@ void VariableCoeffPoissonOperator::restrictResidual(
 #else
         This_will_not_compile !
 #endif
-            (CHF_FRA_SHIFT(res, civ), CHF_CONST_FRA_SHIFT(dpsi, iv),
+            (CHF_FRA_SHIFT(res, civ), CHF_CONST_FRA_SHIFT(constraint_vars, iv),
              CHF_CONST_FRA_SHIFT(rhs, iv), CHF_CONST_REAL(m_alpha),
              CHF_CONST_FRA_SHIFT(thisACoef, iv), CHF_CONST_REAL(m_beta),
              CHF_CONST_FRA_SHIFT(thisBCoef, iv), CHF_BOX_SHIFT(region, iv),
@@ -282,7 +289,8 @@ void VariableCoeffPoissonOperator::computeLambda()
 // NB This was removed as we do not need it - may want to reinstate, if so see
 // MG examples for reflux operator
 void VariableCoeffPoissonOperator::reflux(
-    const LevelData<FArrayBox> &a_dpsiFine, const LevelData<FArrayBox> &a_dpsi,
+    const LevelData<FArrayBox> &a_constraint_varsFine,
+    const LevelData<FArrayBox> &a_constraint_vars,
     LevelData<FArrayBox> &a_residual,
     AMRLevelOp<LevelData<FArrayBox>> *a_finerOp)
 {
@@ -291,38 +299,39 @@ void VariableCoeffPoissonOperator::reflux(
     // not implemented" << endl;
 }
 
-void VariableCoeffPoissonOperator::levelGSRB(LevelData<FArrayBox> &a_dpsi,
-                                             const LevelData<FArrayBox> &a_rhs)
+void VariableCoeffPoissonOperator::levelGSRB(
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
     CH_TIME("VariableCoeffPoissonOperator::levelGSRB");
 
-    CH_assert(a_dpsi.isDefined());
+    CH_assert(a_constraint_vars.isDefined());
     CH_assert(a_rhs.isDefined());
-    CH_assert(a_dpsi.ghostVect() >= IntVect::Unit);
-    CH_assert(a_dpsi.nComp() == a_rhs.nComp());
+    CH_assert(a_constraint_vars.ghostVect() >= IntVect::Unit);
+    CH_assert(a_constraint_vars.nComp() == a_rhs.nComp());
 
     // Recompute the relaxation coefficient if needed.
     resetLambda();
 
-    const DisjointBoxLayout &dbl = a_dpsi.disjointBoxLayout();
+    const DisjointBoxLayout &dbl = a_constraint_vars.disjointBoxLayout();
 
-    DataIterator dit = a_dpsi.dataIterator();
+    DataIterator dit = a_constraint_vars.dataIterator();
 
     // do first red, then black passes
     for (int whichPass = 0; whichPass <= 1; whichPass++)
     {
         CH_TIMERS("VariableCoeffPoissonOperator::levelGSRB::Compute");
 
-        // fill in intersection of ghostcells and a_dpsi's boxes
+        // fill in intersection of ghostcells and a_constraint_vars's boxes
         {
             CH_TIME(
                 "VariableCoeffPoissonOperator::levelGSRB::homogeneousCFInterp");
-            homogeneousCFInterp(a_dpsi);
+            homogeneousCFInterp(a_constraint_vars);
         }
 
         {
             CH_TIME("VariableCoeffPoissonOperator::levelGSRB::exchange");
-            a_dpsi.exchange(a_dpsi.interval(), m_exchangeCopier);
+            a_constraint_vars.exchange(a_constraint_vars.interval(),
+                                       m_exchangeCopier);
         }
 
         {
@@ -331,7 +340,7 @@ void VariableCoeffPoissonOperator::levelGSRB(LevelData<FArrayBox> &a_dpsi,
             for (dit.begin(); dit.ok(); ++dit)
             {
                 // invoke physical BC's where necessary
-                m_bc(a_dpsi[dit], dbl[dit()], m_domain, m_dx, true);
+                m_bc(a_constraint_vars[dit], dbl[dit()], m_domain, m_dx, true);
             }
         }
 
@@ -348,7 +357,7 @@ void VariableCoeffPoissonOperator::levelGSRB(LevelData<FArrayBox> &a_dpsi,
 #else
             This_will_not_compile !
 #endif
-                (CHF_FRA(a_dpsi[dit]), CHF_CONST_FRA(a_rhs[dit]),
+                (CHF_FRA(a_constraint_vars[dit]), CHF_CONST_FRA(a_rhs[dit]),
                  CHF_BOX(region), CHF_CONST_REAL(m_dx), CHF_CONST_REAL(m_alpha),
                  CHF_CONST_FRA((*m_aCoef)[dit]), CHF_CONST_REAL(m_beta),
                  CHF_CONST_FRA((*m_bCoef)[dit]), CHF_CONST_FRA(m_lambda[dit]),
@@ -358,22 +367,22 @@ void VariableCoeffPoissonOperator::levelGSRB(LevelData<FArrayBox> &a_dpsi,
 }
 
 void VariableCoeffPoissonOperator::levelMultiColor(
-    LevelData<FArrayBox> &a_dpsi, const LevelData<FArrayBox> &a_rhs)
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
     CH_TIME("VariableCoeffPoissonOperator::levelMultiColor");
     MayDay::Abort(
         "VariableCoeffPoissonOperator::levelMultiColor - Not implemented");
 }
 
-void VariableCoeffPoissonOperator::looseGSRB(LevelData<FArrayBox> &a_dpsi,
-                                             const LevelData<FArrayBox> &a_rhs)
+void VariableCoeffPoissonOperator::looseGSRB(
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
     CH_TIME("VariableCoeffPoissonOperator::looseGSRB");
     MayDay::Abort("VariableCoeffPoissonOperator::looseGSRB - Not implemented");
 }
 
 void VariableCoeffPoissonOperator::overlapGSRB(
-    LevelData<FArrayBox> &a_dpsi, const LevelData<FArrayBox> &a_rhs)
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
     CH_TIME("VariableCoeffPoissonOperator::overlapGSRB");
     MayDay::Abort(
@@ -381,7 +390,7 @@ void VariableCoeffPoissonOperator::overlapGSRB(
 }
 
 void VariableCoeffPoissonOperator::levelGSRBLazy(
-    LevelData<FArrayBox> &a_dpsi, const LevelData<FArrayBox> &a_rhs)
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
     CH_TIME("VariableCoeffPoissonOperator::levelGSRBLazy");
     MayDay::Abort(
@@ -389,7 +398,7 @@ void VariableCoeffPoissonOperator::levelGSRBLazy(
 }
 
 void VariableCoeffPoissonOperator::levelJacobi(
-    LevelData<FArrayBox> &a_dpsi, const LevelData<FArrayBox> &a_rhs)
+    LevelData<FArrayBox> &a_constraint_vars, const LevelData<FArrayBox> &a_rhs)
 {
 
     CH_TIME("VariableCoeffPoissonOperator::levelJacobi");
@@ -401,7 +410,7 @@ void VariableCoeffPoissonOperator::levelJacobi(
     create(resid, a_rhs);
 
     // Get the residual
-    residual(resid, a_dpsi, a_rhs, true);
+    residual(resid, a_constraint_vars, a_rhs, true);
 
     // Multiply by the weights
     DataIterator dit = m_lambda.dataIterator();
@@ -411,10 +420,10 @@ void VariableCoeffPoissonOperator::levelJacobi(
     }
 
     // Do the Jacobi relaxation
-    incr(a_dpsi, resid, 0.5);
+    incr(a_constraint_vars, resid, 0.5);
 
     // exchange ghost cells
-    a_dpsi.exchange(a_dpsi.interval(), m_exchangeCopier);
+    a_constraint_vars.exchange(a_constraint_vars.interval(), m_exchangeCopier);
 }
 
 // Removed as only needed for fluxes, may need to reinstate in future,

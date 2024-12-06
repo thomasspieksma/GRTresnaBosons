@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef DERIVATIVEOPERATORS_HPP_
 #define DERIVATIVEOPERATORS_HPP_
 
@@ -5,7 +10,7 @@
 #include "FArrayBox.H"
 #include "IntVect.H"
 #include "Interval.H"
-#include "MultigridUserVariables.hpp"
+#include "MultigridVariables.hpp"
 #include "REAL.H"
 #include "RealVect.H"
 #include "Tensor.hpp"

@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef SIMULATIONPARAMETERS_HPP_
 #define SIMULATIONPARAMETERS_HPP_
 
@@ -21,7 +26,7 @@ template <class method_t, class matter_t> class SimulationParameters
         method_t::read_params(pp, method_params);
         matter_t::read_params(pp, matter_params);
         Grids::read_params(pp, grid_params);
-        PsiAndAijFunctions::read_params(pp, psi_and_Aij_functions_params);
+        PsiAndAijFunctions::read_params(pp, psi_and_Aij_params);
     }
 
     void read_base_params(GRParmParse &pp);
@@ -32,7 +37,7 @@ template <class method_t, class matter_t> class SimulationParameters
     typename matter_t::params_t matter_params;
     typename BoundaryConditions::params_t boundary_params;
     typename Grids::params_t grid_params;
-    typename PsiAndAijFunctions::params_t psi_and_Aij_functions_params;
+    typename PsiAndAijFunctions::params_t psi_and_Aij_params;
     BaseParams base_params;
 
   private:

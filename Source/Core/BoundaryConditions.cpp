@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 // Chombo includes
 #include "FArrayBox.H"
 #include "ProblemDomain.H"
@@ -25,8 +30,8 @@ BoundaryConditions::params_t::params_t()
     reflective_boundaries_exist = false;
     vars_parity_metric = MetricVariables::vars_parity;
     vars_parity_matter = MatterVariables::vars_parity;
-    vars_parity_grchombo = GRChomboUserVariables::vars_parity;
-    vars_parity_constraint = ConstraintUserVariables::vars_parity;
+    vars_parity_grchombo = GRChomboVariables::vars_parity;
+    vars_parity_constraint = ConstraintVariables::vars_parity;
     extrapolation_order = 1;
 }
 
@@ -133,7 +138,7 @@ void BoundaryConditions::write_reflective_conditions(int idir,
         int parity = get_var_parity(icomp, idir, a_params);
         if (parity == -1)
         {
-            pout() << MultigridUserVariables::metric_variable_names[icomp]
+            pout() << MultigridVariables::metric_variable_names[icomp]
                    << "    ";
         }
     }
@@ -142,7 +147,7 @@ void BoundaryConditions::write_reflective_conditions(int idir,
         int parity = get_var_parity(icomp, idir, a_params);
         if (parity == -1)
         {
-            pout() << MultigridUserVariables::matter_variable_names[icomp]
+            pout() << MultigridVariables::matter_variable_names[icomp]
                    << "    ";
         }
     }
@@ -152,7 +157,7 @@ void BoundaryConditions::write_reflective_conditions(int idir,
             get_var_parity(icomp, idir, a_params, VariableType::grchombo);
         if (parity == -1)
         {
-            pout() << GRChomboUserVariables::variable_names[icomp] << "    ";
+            pout() << GRChomboVariables::variable_names[icomp] << "    ";
         }
     }
     for (int icomp = 0; icomp < NUM_CONSTRAINT_VARS; icomp++)
@@ -161,7 +166,7 @@ void BoundaryConditions::write_reflective_conditions(int idir,
             get_var_parity(icomp, idir, a_params, VariableType::constraint);
         if (parity == -1)
         {
-            pout() << ConstraintUserVariables::variable_names[icomp] << "    ";
+            pout() << ConstraintVariables::variable_names[icomp] << "    ";
         }
     }
 }
@@ -201,10 +206,8 @@ void BoundaryConditions::write_boundary_conditions(const params_t &a_params)
     pout() << "---------------------------------" << endl;
 }
 
-/// The function which returns the parity of each of the vars in
-/// UserVariables.hpp The parity should be defined in the params file, and
-/// will be output to the pout files for checking at start/restart of
-/// simulation (It is only required for reflective boundary conditions.)
+/// The function which returns the parity of each of the vars depending on the
+//  type. (It is only required for reflective boundary conditions.)
 int BoundaryConditions::get_var_parity(int a_comp, int a_dir,
                                        const VariableType var_type) const
 {
@@ -354,6 +357,7 @@ void BoundaryConditions::fill_constraint_box(const Side::LoHiSide a_side,
                     fill_constant_cell(a_state, iv, a_side, idir, psi_comps,
                                        0.0);
 
+                    // TODO: Check if reinstating this improves solver?
                     // const extrapolating for V_i (means Aij = 0)
                     // int extrapolation_order = 0;
                     // fill_extrapolating_cell(a_state, iv, a_side, idir,
@@ -431,6 +435,8 @@ void BoundaryConditions::fill_boundary_cells_dir(
                     fill_constant_cell(out_box, iv, a_side, dir, psi_comps,
                                        1.0);
 
+                    // TODO: Again check if this changes things
+                    // and if not remove
                     // int extrapolation_order = 0;
                     // fill_extrapolating_cell(out_box, iv, a_side, dir,
                     // Vi_comps,

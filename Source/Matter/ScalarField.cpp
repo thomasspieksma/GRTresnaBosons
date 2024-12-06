@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #include "ScalarField.hpp"
 #include "DerivativeOperators.hpp"
 #include "EMTensor.hpp"
@@ -6,7 +11,7 @@
 #include "Grids.hpp"
 #include "IntVect.H"
 #include "LevelData.H"
-#include "MultigridUserVariables.hpp"
+#include "MultigridVariables.hpp"
 #include "PsiAndAijFunctions.hpp"
 #include "REAL.H"
 #include "RealVect.H"
