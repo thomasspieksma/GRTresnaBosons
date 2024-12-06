@@ -1,9 +1,15 @@
+/* GRTresna                                                                          
+* Copyright 2024 The GRTL collaboration.
+* Please refer to LICENSE in GRTresna's root directory.
+*/
+
 #include "mpi.h"
 #include <iostream>
 
 #include "CTTK.hpp"
 #include "CTTKHybrid.hpp"
 #include "GRSolver.hpp"
+#include "GRParmParse.hpp"
 #include "ScalarField.hpp"
 
 using namespace std;
@@ -28,24 +34,23 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    // Read params here for now
-
-    // Create solver, specifying method and matter
+    // Read params input file
     char *inFile = argv[1];
     GRParmParse pp(argc - 2, argv + 2, NULL, inFile);
 
+    // Create solver, specifying method and matter
+    // Need to define these in the environment - see
+    // https://github.com/GRTLCollaboration/GRTresna/wiki/Solver-methods
+    // for more details
 #if defined(USE_CTTK)
     GRSolver<CTTK<ScalarField>, ScalarField> solver(pp);
     pout() << "Using CTTK" << endl;
 #elif defined(USE_CTTKHybrid)
     GRSolver<CTTKHybrid<ScalarField>, ScalarField> solver(pp);
     pout() << "Using CTTK Hybrid" << endl;
-#elif defined(USE_OtherMethod)
-    GRSolver<OtherMethod<ScalarField>, ScalarField> solver(pp);
-    pout() << "Using Other Method" << endl;
 #else
 #error                                                                         \
-    "No valid method defined. Please define one of the methods in the GNUMakefile."
+    "No valid GRSolver method defined. Please define one of the methods in the GNUMakefile. See the wiki page on solver methods for more details."
 #endif
 
     solver.setup();

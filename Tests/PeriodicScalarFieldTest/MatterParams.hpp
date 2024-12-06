@@ -7,6 +7,7 @@
 #define MATTERPARAMS_HPP_
 
 #include "REAL.H"
+#include "GRParmParse.hpp"
 
 namespace MatterParams
 {

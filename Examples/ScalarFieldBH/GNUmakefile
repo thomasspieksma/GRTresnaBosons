@@ -13,7 +13,6 @@ makefiles += releasedExamples_AMRPoisson_execVariableCoefficient
 # Choose a method USE_CTTK or USE_CTTKHybrid
 # cxxcppflags = -DUSE_CTTK
 cxxcppflags = -DUSE_CTTKHybrid
-# cxxcppflags = -DUSE_OtherMethod
 
 # the base name(s) of the application(s) in this directory
 ebase = Main_ScalarFieldBH
@@ -32,7 +31,7 @@ src_dirs := ../../Source \
             ../../Source/Tools \
             ../../Source/Variables \
             ../../Source/TaggingCriteria \
-	        ../../Source/Operator \
+	          ../../Source/Operator \
             ../../Source/Operator/SolverOperator 
 
 # shared code for building example programs

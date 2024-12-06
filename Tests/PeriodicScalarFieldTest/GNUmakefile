@@ -25,7 +25,7 @@ src_dirs := ../../Source \
             ../../Source/Tools \
             ../../Source/Variables \
             ../../Source/TaggingCriteria \
-	        ../../Source/Operator \
+  	        ../../Source/Operator \
             ../../Source/Operator/SolverOperator 
 
 # shared code for building example programs
