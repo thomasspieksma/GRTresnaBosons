@@ -20,6 +20,7 @@
 #include "GRParmParse.hpp"
 #include "LevelData.H"
 #include "MultigridVariables.hpp"
+#include "ParityDefinitions.hpp"
 #include "VariableType.hpp"
 
 // Chombo namespace
@@ -36,20 +37,6 @@ class BoundaryConditions
     {
         EXTRAPOLATING_BC,
         REFLECTIVE_BC
-    };
-
-    /// enum for possible parity states
-    enum
-    {
-        EVEN,
-        ODD_X,
-        ODD_Y,
-        ODD_Z,
-        ODD_XY,
-        ODD_YZ,
-        ODD_XZ,
-        ODD_XYZ,
-        UNDEFINED
     };
 
     /// Structure containing the boundary condition params

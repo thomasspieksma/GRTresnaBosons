@@ -7,6 +7,7 @@
 #define METRICVARIABLES_HPP
 
 #include "ArrayTools.hpp"
+#include "ParityDefinitions.hpp"
 
 // assign an enum to each metric variable
 enum
@@ -42,7 +43,8 @@ static const std::array<std::string, NUM_METRIC_VARS> variable_names = {
     "A11_0",   "A12_0", "A13_0", "A22_0", "A23_0", "A33_0"};
 
 static constexpr std::array<int, NUM_METRIC_VARS> const vars_parity = {
-    0, 1, 2, 3, 0, 0, 0, 4, 6, 0, 5, 0};
+    EVEN, ODD_X,  ODD_Y,  ODD_Z, EVEN,   EVEN,
+    EVEN, ODD_XY, ODD_XZ, EVEN,  ODD_YZ, EVEN};
 
 } // namespace MetricVariables
 

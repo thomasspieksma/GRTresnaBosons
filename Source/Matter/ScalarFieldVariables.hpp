@@ -7,6 +7,7 @@
 #define SCALARFIELDVARIABLES_HPP_
 
 #include "MetricVariables.hpp"
+#include "ParityDefinitions.hpp"
 
 // Matter Vars
 enum
@@ -23,7 +24,7 @@ static const std::array<std::string, NUM_MULTIGRID_VARS - NUM_METRIC_VARS>
     variable_names = {"phi_0", "Pi_0"};
 
 static constexpr std::array<int, NUM_MULTIGRID_VARS - NUM_METRIC_VARS> const
-    vars_parity = {0, 0};
+    vars_parity = {EVEN, EVEN};
 
 } // namespace MatterVariables
 

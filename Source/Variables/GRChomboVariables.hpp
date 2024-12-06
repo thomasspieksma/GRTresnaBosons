@@ -7,6 +7,7 @@
 #define GRCHOMBOVARIABLES_HPP
 
 #include "ArrayTools.hpp"
+#include "ParityDefinitions.hpp"
 
 // assign an enum to each variable
 enum
@@ -75,8 +76,9 @@ static constexpr char const *variable_names[NUM_GRCHOMBO_VARS] = {
     "phi",    "Pi"};
 
 static constexpr std::array<int, NUM_GRCHOMBO_VARS> const vars_parity = {
-    0, 0, 4, 6, 0, 5, 0, 0, 0, 4, 6, 0, 5, 0,
-    0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 0, 0};
+    EVEN,   EVEN,   ODD_XY, ODD_XZ, EVEN,  ODD_YZ, EVEN,  EVEN,  EVEN,
+    ODD_XY, ODD_XZ, EVEN,   ODD_YZ, EVEN,  EVEN,   ODD_X, ODD_Y, ODD_Z,
+    EVEN,   ODD_X,  ODD_Y,  ODD_Z,  ODD_X, ODD_Y,  ODD_Z, EVEN,  EVEN};
 
 } // namespace GRChomboVariables
 
