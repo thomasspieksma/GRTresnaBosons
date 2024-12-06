@@ -1,3 +1,8 @@
+/* GRTresna                                                                          
+* Copyright 2024 The GRTL collaboration.
+* Please refer to LICENSE in GRTresna's root directory.
+*/
+
 #ifdef CH_MPI
 #include "mpi.h"
 #endif
@@ -6,8 +11,10 @@
 
 #include "CTTK.hpp"
 #include "CTTKHybrid.hpp"
+#include "Diagnostics.hpp"
 #include "GRSolver.hpp"
 #include "ScalarField.hpp"
+#include "SimulationParameters.hpp"
 
 using namespace std;
 
@@ -151,12 +158,6 @@ int main(int argc, char *argv[])
                                                   rhs[ilev], dxLevel);
         }
 
-        // const double Ham_abs_sum =
-        //     grids->compute_sum(diagnostic_vars, Interval(c_Ham_abs,
-        //     c_Ham_abs));
-        // const double Mom_abs_sum =
-        //     grids->compute_sum(diagnostic_vars, Interval(c_Mom_abs,
-        //     c_Mom_abs));
         for (int ilev = 0; ilev < numLevels; ilev++)
         {
             RealVect dxLevel = grids->vectDx[ilev];

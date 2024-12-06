@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef USERVARIABLES_HPP
 #define USERVARIABLES_HPP
 
