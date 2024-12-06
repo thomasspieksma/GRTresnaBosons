@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef CTTKHybrid_HPP_
 #error "This file should only be included through CTTKHybrid.hpp"
 #endif
@@ -129,13 +134,13 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             aCoef_box.setVal(0.0, comp);
             bCoef_box.setVal(1.0, comp);
 
-            // // this prevents small amounts of noise in the sources
-            // // activating the zero modes - (Garfinkle trick)
-            // if (m_method_params.deactivate_zero_mode)
-            // {
-            //     // Seems to work best to set this relative to the tolerance
-            //     aCoef_box.setVal(-1e4 * tolerance, iconstraint);
-            // }
+            // this prevents small amounts of noise in the sources
+            // activating the zero modes - (Garfinkle trick) see 2207.03125
+            if (m_method_params.deactivate_zero_mode)
+            {
+                Real small_number = 1e-10;
+                aCoef_box.setVal(-small_number, comp);
+            }
         }
         Box unghosted_box = rhs_box.box();
         BoxIterator bit(unghosted_box);
@@ -204,7 +209,6 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 (2.0 / 3.0 * d1_K[2] + 8.0 * M_PI * G_Newton * emtensor.Si[2]);
 
             // Periodic: Use ansatz B.3 in B&S (p547)
-            // JCA TODO: We are not using this U when constructing Aij
             // Non-periodic: Compact ansatz B.7 in B&S (p547)
             if (!m_method_params.use_compact_Vi_ansatz)
             {

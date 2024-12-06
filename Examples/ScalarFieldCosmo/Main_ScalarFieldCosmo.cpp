@@ -1,15 +1,15 @@
-/* GRTresna                                                                          
-* Copyright 2024 The GRTL collaboration.
-* Please refer to LICENSE in GRTresna's root directory.
-*/
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
 
 #include "mpi.h"
 #include <iostream>
 
 #include "CTTK.hpp"
 #include "CTTKHybrid.hpp"
-#include "GRSolver.hpp"
 #include "GRParmParse.hpp"
+#include "GRSolver.hpp"
 #include "ScalarField.hpp"
 
 using namespace std;

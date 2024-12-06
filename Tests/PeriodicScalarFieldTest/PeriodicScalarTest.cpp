@@ -1,7 +1,7 @@
-/* GRTresna                                                                          
-* Copyright 2024 The GRTL collaboration.
-* Please refer to LICENSE in GRTresna's root directory.
-*/
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
 
 #ifdef CH_MPI
 #include "mpi.h"
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     int numLevels = params.grid_params.numLevels;
 
     PsiAndAijFunctions *psi_and_Aij_functions =
-        new PsiAndAijFunctions(params.psi_and_Aij_functions_params);
+        new PsiAndAijFunctions(params.psi_and_Aij_params);
     ScalarField *matter = new ScalarField(
         params.matter_params, psi_and_Aij_functions, params.grid_params.center,
         params.grid_params.domainLength);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
             params.grid_params.center);
 
     Vector<LevelData<FArrayBox> *> multigrid_vars(numLevels, NULL);
-    Vector<LevelData<FArrayBox> *> dpsi(numLevels, NULL);
+    Vector<LevelData<FArrayBox> *> constraint_vars(numLevels, NULL);
     Vector<LevelData<FArrayBox> *> rhs(numLevels, NULL);
     Vector<LevelData<FArrayBox> *> diagnostic_vars(numLevels, NULL);
     Vector<RefCountedPtr<LevelData<FArrayBox>>> aCoef(numLevels);
@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
         multigrid_vars[ilev] = new LevelData<FArrayBox>(
             grids->grids_data[ilev], NUM_MULTIGRID_VARS, ghosts);
 
-        dpsi[ilev] = new LevelData<FArrayBox>(grids->grids_data[ilev],
-                                              NUM_CONSTRAINT_VARS, ghosts);
+        constraint_vars[ilev] = new LevelData<FArrayBox>(
+            grids->grids_data[ilev], NUM_CONSTRAINT_VARS, ghosts);
         rhs[ilev] = new LevelData<FArrayBox>(grids->grids_data[ilev],
                                              NUM_CONSTRAINT_VARS, no_ghosts);
         aCoef[ilev] =
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
         method->initialise_method_vars(*multigrid_vars[ilev], dxLevel);
         matter->initialise_matter_vars(*multigrid_vars[ilev], dxLevel);
 
-        method->initialise_constraint_vars(*dpsi[ilev], dxLevel);
+        method->initialise_constraint_vars(*constraint_vars[ilev], dxLevel);
         method->initialise_constraint_vars(*rhs[ilev], dxLevel);
         method->initialise_constraint_vars(*aCoef[ilev], dxLevel);
         method->initialise_constraint_vars(*bCoef[ilev], dxLevel);
@@ -174,9 +174,9 @@ int main(int argc, char *argv[])
         bool homogeneousBC = false;
         solver.define(&mlOp, homogeneousBC);
 
-        solver.solve(dpsi, rhs);
+        solver.solve(constraint_vars, rhs);
 
-        grids->update_psi0(multigrid_vars, dpsi,
+        grids->update_psi0(multigrid_vars, constraint_vars,
                            params.method_params.deactivate_zero_mode);
 
         bool filling_solver_vars = true;

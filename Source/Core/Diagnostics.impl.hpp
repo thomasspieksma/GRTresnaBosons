@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #include "DerivativeOperators.hpp"
 #include "DiagnosticVariables.hpp"
 
@@ -181,20 +186,10 @@ void Diagnostics<method_t, matter_t>::normalise_constraints(
                 diagnostic_vars_box(iv, c_Mom_norm) = 0;
             }
 
-            // if (iv == lo)
-            // {
-            //     pout() << iv << endl;
-            //     diagnostic_vars_box(iv, c_Ham_norm) = 0;
-            //     diagnostic_vars_box(iv, c_Mom_norm) = 0;
-            // }
-
             if (diagnostic_vars_box(iv, c_Ham_norm) < -0.5)
             {
                 pout() << iv << endl;
             }
-            // diagnostic_vars_box(iv, c_Mom_norm) = sqrt(Mom1 / Mom1_abs * Mom1
-            // / Mom1_abs + Mom2 / Mom2_abs * Mom2 / Mom2_abs + Mom3 / Mom3_abs
-            // * Mom3 / Mom3_abs);
         }
     }
 }

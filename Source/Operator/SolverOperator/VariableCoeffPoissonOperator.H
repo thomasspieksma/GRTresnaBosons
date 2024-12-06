@@ -19,7 +19,7 @@
 ///
 /**
    Operator for solving variable-coefficient
-   (alpha * aCoef(x) * I - beta * cCoef(x) * laplacian ) dpsi = rhs
+   (alpha * aCoef(x) * I - beta * cCoef(x) * laplacian ) constraint_vars = rhs
    over an AMR hierarchy.
 */
 class VariableCoeffPoissonOperator : public AMRPoissonOp
@@ -33,7 +33,7 @@ class VariableCoeffPoissonOperator : public AMRPoissonOp
 
     /// calculate residual
     virtual void residualI(LevelData<FArrayBox> &a_lhs,
-                           const LevelData<FArrayBox> &a_dpsi,
+                           const LevelData<FArrayBox> &a_constraint_vars,
                            const LevelData<FArrayBox> &a_rhs,
                            bool a_homogeneous = false);
 
@@ -43,18 +43,18 @@ class VariableCoeffPoissonOperator : public AMRPoissonOp
 
     ///
     virtual void applyOpI(LevelData<FArrayBox> &a_lhs,
-                          const LevelData<FArrayBox> &a_dpsi,
+                          const LevelData<FArrayBox> &a_constraint_vars,
                           bool a_homogeneous = false);
 
     virtual void applyOpNoBoundary(LevelData<FArrayBox> &a_lhs,
-                                   const LevelData<FArrayBox> &a_dpsi);
+                                   const LevelData<FArrayBox> &a_constraint_vars);
 
     /**
        calculate restricted residual
-       a_resCoarse[2h] = I[h->2h] (rhsFine[h] - L[h](dpsiFine[h])
+       a_resCoarse[2h] = I[h->2h] (rhsFine[h] - L[h](constraint_varsFine[h])
     */
     virtual void restrictResidual(LevelData<FArrayBox> &a_resCoarse,
-                                  LevelData<FArrayBox> &a_dpsiFine,
+                                  LevelData<FArrayBox> &a_constraint_varsFine,
                                   const LevelData<FArrayBox> &a_rhsFine);
 
     /// For tga stuff
@@ -72,8 +72,8 @@ class VariableCoeffPoissonOperator : public AMRPoissonOp
     virtual void computeLambda();
 
     /// refluxing - not implemented
-    virtual void reflux(const LevelData<FArrayBox> &a_dpsiFine,
-                        const LevelData<FArrayBox> &a_dpsi,
+    virtual void reflux(const LevelData<FArrayBox> &a_constraint_varsFine,
+                        const LevelData<FArrayBox> &a_constraint_vars,
                         LevelData<FArrayBox> &a_residual,
                         AMRLevelOp<LevelData<FArrayBox>> *a_finerOp);
 
@@ -144,22 +144,22 @@ class VariableCoeffPoissonOperator : public AMRPoissonOp
     // Does the relaxation coefficient need to be reset?
     bool m_lambdaNeedsResetting;
 
-    virtual void levelGSRB(LevelData<FArrayBox> &a_dpsi,
+    virtual void levelGSRB(LevelData<FArrayBox> &a_constraint_vars,
                            const LevelData<FArrayBox> &a_rhs);
 
-    virtual void levelMultiColor(LevelData<FArrayBox> &a_dpsi,
+    virtual void levelMultiColor(LevelData<FArrayBox> &a_constraint_vars,
                                  const LevelData<FArrayBox> &a_rhs);
 
-    virtual void looseGSRB(LevelData<FArrayBox> &a_dpsi,
+    virtual void looseGSRB(LevelData<FArrayBox> &a_constraint_vars,
                            const LevelData<FArrayBox> &a_rhs);
 
-    virtual void overlapGSRB(LevelData<FArrayBox> &a_dpsi,
+    virtual void overlapGSRB(LevelData<FArrayBox> &a_constraint_vars,
                              const LevelData<FArrayBox> &a_rhs);
 
-    virtual void levelGSRBLazy(LevelData<FArrayBox> &a_dpsi,
+    virtual void levelGSRBLazy(LevelData<FArrayBox> &a_constraint_vars,
                                const LevelData<FArrayBox> &a_rhs);
 
-    virtual void levelJacobi(LevelData<FArrayBox> &a_dpsi,
+    virtual void levelJacobi(LevelData<FArrayBox> &a_constraint_vars,
                              const LevelData<FArrayBox> &a_rhs);
 };
 

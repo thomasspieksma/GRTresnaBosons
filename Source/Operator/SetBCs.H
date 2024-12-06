@@ -1,12 +1,7 @@
-#ifdef CH_LANG_CC
-/*
- *      _______              __
- *     / ___/ /  ___  __ _  / /  ___
- *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
- *    \___/_//_/\___/_/_/_/_.__/\___/
- *    Please refer to Copyright.txt, in Chombo's root directory.
- */
-#endif
+/* GRTresna                                                                          
+* Copyright 2024 The GRTL Collaboration.
+* Please refer to LICENSE in GRTresna's root directory.
+*/
 
 #ifndef _SETBCS_H_
 #define _SETBCS_H_
@@ -19,7 +14,6 @@ using std::cerr;
 #include "DimensionDefinitions.hpp"
 #include "DisjointBoxLayout.H"
 #include "FArrayBox.H"
-#include "MultigridUserVariables.hpp"
 #include "ParmParse.H"
 #include "VariableCoeffPoissonOperator.H"
 

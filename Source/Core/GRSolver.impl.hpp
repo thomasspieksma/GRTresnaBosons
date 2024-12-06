@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef GRSOLVER_HPP_
 #error "This file should only be included through GRSolver.hpp"
 #endif
@@ -13,12 +18,11 @@
 template <class method_t, class matter_t>
 GRSolver<method_t, matter_t>::GRSolver(GRParmParse &a_pp)
     : pp(a_pp), params(pp), numLevels(params.grid_params.numLevels),
-      multigrid_vars(numLevels, NULL), dpsi(numLevels, NULL),
+      multigrid_vars(numLevels, NULL), constraint_vars(numLevels, NULL),
       rhs(numLevels, NULL), aCoef(numLevels), bCoef(numLevels),
       diagnostic_vars(numLevels, NULL), Ham_error(0.), Mom_error(0.)
 {
-    psi_and_Aij_functions =
-        new PsiAndAijFunctions(params.psi_and_Aij_functions_params);
+    psi_and_Aij_functions = new PsiAndAijFunctions(params.psi_and_Aij_params);
     matter = new matter_t(params.matter_params, psi_and_Aij_functions,
                           params.grid_params.center,
                           params.grid_params.domainLength);
@@ -67,8 +71,8 @@ void GRSolver<method_t, matter_t>::setup()
     solver.m_eps = params.base_params.iter_tolerance;
     solver.m_imax = params.base_params.max_iter;
 
-    output_solver_data(dpsi, multigrid_vars, diagnostic_vars, grids->grids_data,
-                       params, 0);
+    output_solver_data(constraint_vars, multigrid_vars, diagnostic_vars,
+                       grids->grids_data, params, 0);
 }
 
 template <class method_t, class matter_t>
@@ -109,9 +113,9 @@ int GRSolver<method_t, matter_t>::run()
         bool homogeneousBC = false;
         solver.define(&mlOp, homogeneousBC);
 
-        solver.solve(dpsi, rhs);
+        solver.solve(constraint_vars, rhs);
 
-        grids->update_psi0(multigrid_vars, dpsi,
+        grids->update_psi0(multigrid_vars, constraint_vars,
                            params.method_params.deactivate_zero_mode);
 
         bool filling_solver_vars = true;
@@ -122,7 +126,7 @@ int GRSolver<method_t, matter_t>::run()
             ((NL_iter + 1) % params.base_params.diagnostic_interval == 0);
         if (params.base_params.write_diagnostics && at_diagnostic_interval)
         {
-            output_solver_data(dpsi, multigrid_vars, diagnostic_vars,
+            output_solver_data(constraint_vars, multigrid_vars, diagnostic_vars,
                                grids->grids_data, params, NL_iter + 1);
         }
     }
@@ -210,8 +214,8 @@ void GRSolver<method_t, matter_t>::create_vars()
         multigrid_vars[ilev] = new LevelData<FArrayBox>(
             grids->grids_data[ilev], NUM_MULTIGRID_VARS, ghosts);
 
-        dpsi[ilev] = new LevelData<FArrayBox>(grids->grids_data[ilev],
-                                              NUM_CONSTRAINT_VARS, ghosts);
+        constraint_vars[ilev] = new LevelData<FArrayBox>(
+            grids->grids_data[ilev], NUM_CONSTRAINT_VARS, ghosts);
         rhs[ilev] = new LevelData<FArrayBox>(grids->grids_data[ilev],
                                              NUM_CONSTRAINT_VARS, no_ghosts);
         aCoef[ilev] =
@@ -231,7 +235,7 @@ void GRSolver<method_t, matter_t>::create_vars()
         method->initialise_method_vars(*multigrid_vars[ilev], dxLevel);
         matter->initialise_matter_vars(*multigrid_vars[ilev], dxLevel);
 
-        method->initialise_constraint_vars(*dpsi[ilev], dxLevel);
+        method->initialise_constraint_vars(*constraint_vars[ilev], dxLevel);
         method->initialise_constraint_vars(*rhs[ilev], dxLevel);
         method->initialise_constraint_vars(*aCoef[ilev], dxLevel);
         method->initialise_constraint_vars(*bCoef[ilev], dxLevel);
@@ -248,15 +252,16 @@ GRSolver<method_t, matter_t>::~GRSolver()
     delete grids;
     delete method;
     delete matter;
-    // delete tagging_criterion; // There is some issue here when deleting
-    // (double free or corruption (!prev))
+    // TODO: Fix this?
+    //  delete tagging_criterion; // There is some issue here when deleting
+    //  (double free or corruption (!prev))
     delete psi_and_Aij_functions;
     delete diagnostics;
 
     for (int ilev = 0; ilev < numLevels; ilev++)
     {
         delete multigrid_vars[ilev];
-        delete dpsi[ilev];
+        delete constraint_vars[ilev];
         delete rhs[ilev];
         delete aCoef[ilev];
         delete bCoef[ilev];

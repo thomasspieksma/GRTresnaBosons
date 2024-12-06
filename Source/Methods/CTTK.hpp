@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef CTTK_HPP_
 #define CTTK_HPP_
 
@@ -37,7 +42,7 @@ template <typename matter_t> class CTTK
                             const RealVect &a_dx);
 
     params_t m_method_params;
-    PsiAndAijFunctions::params_t m_psi_and_Aij_functions_params;
+    PsiAndAijFunctions::params_t m_psi_and_Aij_params;
 
     matter_t *matter;
     PsiAndAijFunctions *psi_and_Aij_functions;

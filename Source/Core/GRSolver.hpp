@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef GRSOLVER_HPP_
 #define GRSOLVER_HPP_
 
@@ -9,9 +14,8 @@
 
 /*
 Class that manages high-level solver functionality, independent of specific
-
+method
 */
-
 template <class method_t, class matter_t> class GRSolver
 {
   public:
@@ -51,7 +55,7 @@ template <class method_t, class matter_t> class GRSolver
 
     Vector<LevelData<FArrayBox> *> multigrid_vars;
 
-    Vector<LevelData<FArrayBox> *> dpsi;
+    Vector<LevelData<FArrayBox> *> constraint_vars;
     Vector<LevelData<FArrayBox> *> rhs;
     Vector<LevelData<FArrayBox> *> diagnostic_vars;
     Vector<RefCountedPtr<LevelData<FArrayBox>>> aCoef;

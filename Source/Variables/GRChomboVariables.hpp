@@ -1,5 +1,10 @@
-#ifndef GRCHOMBOUSERVARIABLES_HPP
-#define GRCHOMBOUSERVARIABLES_HPP
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
+#ifndef GRCHOMBOVARIABLES_HPP
+#define GRCHOMBOVARIABLES_HPP
 
 #include "ArrayTools.hpp"
 
@@ -46,7 +51,7 @@ enum
     NUM_GRCHOMBO_VARS
 };
 
-namespace GRChomboUserVariables
+namespace GRChomboVariables
 {
 static constexpr char const *variable_names[NUM_GRCHOMBO_VARS] = {
     "chi",
@@ -73,6 +78,6 @@ static constexpr std::array<int, NUM_GRCHOMBO_VARS> const vars_parity = {
     0, 0, 4, 6, 0, 5, 0, 0, 0, 4, 6, 0, 5, 0,
     0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 0, 0};
 
-} // namespace GRChomboUserVariables
+} // namespace GRChomboVariables
 
-#endif /* GRCHOMBOUSERVARIABLES_HPP */
+#endif /* GRCHOMBOVARIABLES_HPP */

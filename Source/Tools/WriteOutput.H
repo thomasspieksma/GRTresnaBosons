@@ -1,17 +1,7 @@
-/* GRChombo
- * Copyright 2012 The GRChombo collaboration.
- * Please refer to LICENSE in GRChombo's root directory.
- */
-
-#ifdef CH_LANG_CC
-/*
- *      _______              __
- *     / ___/ /  ___  __ _  / /  ___
- *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
- *    \___/_//_/\___/_/_/_/_.__/\___/
- *    Please refer to Copyright.txt, in Chombo's root directory.
- */
-#endif
+/* GRTresna                                                                          
+* Copyright 2024 The GRTL collaboration.
+* Please refer to LICENSE in GRTresna's root directory.
+*/
 
 #ifndef _WRITEOUTPUT_H_
 #define _WRITEOUTPUT_H_
@@ -25,11 +15,11 @@
 #include "FABView.H"
 #include "FArrayBox.H"
 #include "FourthOrderCFInterp.H"
-#include "GRChomboUserVariables.hpp"
+#include "GRChomboVariables.hpp"
 #include "Grids.hpp"
 #include "LevelData.H"
 #include "LoadBalance.H"
-#include "MultigridUserVariables.hpp"
+#include "MultigridVariables.hpp"
 #include "MultilevelLinearOp.H"
 #include "ParmParse.H"
 #include "SimulationParameters.hpp"
@@ -51,7 +41,7 @@ using std::cerr;
 /// which helps to check convergence and debug
 template <typename method_t, typename matter_t>
 void output_solver_data(
-    const Vector<LevelData<FArrayBox> *> &a_dpsi,
+    const Vector<LevelData<FArrayBox> *> &a_constraint_vars,
     const Vector<LevelData<FArrayBox> *> &a_multigrid_vars,
     const Vector<LevelData<FArrayBox> *> &a_diagnostic_vars,
     const Vector<DisjointBoxLayout> &a_grids,
@@ -71,20 +61,20 @@ void output_solver_data(
     sprintf(suffix, "_0%04i.hdf5", iter);
     filename += suffix;
 
-    int ndpsiComp = a_dpsi[0]->nComp();
+    int nConComp = a_constraint_vars[0]->nComp();
     int nMGComp = a_multigrid_vars[0]->nComp();
     int nDiagComp = a_diagnostic_vars[0]->nComp();
-    int totalComp = ndpsiComp + nMGComp + nDiagComp;
+    int totalComp = nConComp + nMGComp + nDiagComp;
     CH_assert(totalComp ==
               NUM_CONSTRAINT_VARS + NUM_MULTIGRID_VARS + NUM_DIAGNOSTIC_VARS);
     // set names
     Vector<string> variable_names(totalComp);
-    variable_names[0] = "dpsi_reg";
-    variable_names[1] = "V1";
-    variable_names[2] = "V2";
-    variable_names[3] = "V3";
-    variable_names[4] = "U";
 
+    for (int icomp = 0; icomp < NUM_CONSTRAINT_VARS; icomp++)
+    {
+        variable_names[icomp] =
+            ConstraintVariables::variable_names[icomp];
+    }
     for (int icomp = 0; icomp < NUM_METRIC_VARS; icomp++)
     {
         variable_names[NUM_CONSTRAINT_VARS + icomp] =
@@ -102,16 +92,16 @@ void output_solver_data(
     }
 
     // check the domain sizes are the same
-    CH_assert(a_dpsi.size() == a_multigrid_vars.size());
-    CH_assert(a_dpsi.size() == a_diagnostic_vars.size());
+    CH_assert(a_constraint_vars.size() == a_multigrid_vars.size());
+    CH_assert(a_constraint_vars.size() == a_diagnostic_vars.size());
     // Solver only has second order stencils so 1 ghost
     IntVect ghosts = 1 * IntVect::Unit;
-    Vector<LevelData<FArrayBox> *> tempData(a_dpsi.size(), NULL);
-    for (int level = 0; level < a_dpsi.size(); level++)
+    Vector<LevelData<FArrayBox> *> tempData(a_constraint_vars.size(), NULL);
+    for (int level = 0; level < a_constraint_vars.size(); level++)
     {
         tempData[level] =
             new LevelData<FArrayBox>(a_grids[level], totalComp, ghosts);
-        Interval dpsiComps(0, NUM_CONSTRAINT_VARS - 1);
+        Interval conComps(0, NUM_CONSTRAINT_VARS - 1);
         Interval mgComps(NUM_CONSTRAINT_VARS,
                          NUM_CONSTRAINT_VARS + NUM_MULTIGRID_VARS - 1);
         Interval diagComps(NUM_CONSTRAINT_VARS + NUM_MULTIGRID_VARS,
@@ -120,11 +110,11 @@ void output_solver_data(
         ProblemDomain grown_domain_box = a_grids[level].physDomain();
         grown_domain_box.grow(ghosts);
         Copier boundary_copier;
-        boundary_copier.ghostDefine(a_dpsi[level]->getBoxes(),
-                                    a_dpsi[level]->getBoxes(), grown_domain_box,
+        boundary_copier.ghostDefine(a_constraint_vars[level]->getBoxes(),
+                                    a_constraint_vars[level]->getBoxes(), grown_domain_box,
                                     ghosts, ghosts);
-        a_dpsi[level]->copyTo(a_dpsi[level]->interval(), *tempData[level],
-                              dpsiComps, boundary_copier);
+        a_constraint_vars[level]->copyTo(a_constraint_vars[level]->interval(), *tempData[level],
+                              conComps, boundary_copier);
         a_multigrid_vars[level]->copyTo(a_multigrid_vars[level]->interval(),
                                         *tempData[level], mgComps,
                                         boundary_copier);
@@ -139,7 +129,7 @@ void output_solver_data(
                           a_params.grid_params.refRatio,
                           a_params.grid_params.numLevels);
     // clean up temporary storage
-    for (int level = 0; level < a_dpsi.size(); level++)
+    for (int level = 0; level < a_constraint_vars.size(); level++)
     {
         delete tempData[level];
         tempData[level] = NULL;
@@ -187,7 +177,7 @@ void output_final_data(const Vector<LevelData<FArrayBox> *> &a_multigrid_vars,
     for (int comp = 0; comp < NUM_GRCHOMBO_VARS; ++comp)
     {
         sprintf(comp_str, "component_%d", comp);
-        header.m_string[comp_str] = GRChomboUserVariables::variable_names[comp];
+        header.m_string[comp_str] = GRChomboVariables::variable_names[comp];
     }
 
     // write header data to file
@@ -240,12 +230,6 @@ void output_final_data(const Vector<LevelData<FArrayBox> *> &a_multigrid_vars,
         // fill interlevel ghosts from coarser level
         if (level > 0)
         {
-            // QuadCFInterp quadCFI(a_grids[level], &a_grids[level - 1],
-            //                      a_vectDx[level][0],
-            //                      a_params.refRatio[level], NUM_GRCHOMBO_VARS,
-            //                      a_vectDomains[level]);
-            // quadCFI.coarseFineInterp(*grchombo_vars[level],
-            //                          *grchombo_vars[level - 1]);
             FourthOrderCFInterp m_patcher;
             m_patcher.define(a_grids[level], a_grids[level - 1],
                              NUM_GRCHOMBO_VARS, a_vectDomains[level - 1],
@@ -315,7 +299,7 @@ void set_output_data(LevelData<FArrayBox> &a_grchombo_vars,
     CH_assert(a_multigrid_vars.nComp() == NUM_MULTIGRID_VARS);
 
     PsiAndAijFunctions psi_and_Aij_functions(
-        a_params.psi_and_Aij_functions_params);
+        a_params.psi_and_Aij_params);
 
     DataIterator dit = a_grchombo_vars.dataIterator();
     for (dit.begin(); dit.ok(); ++dit)

@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #include "DerivativeOperators.hpp"
 #include "Interval.H"
 #include "REAL.H"
@@ -69,7 +74,7 @@ void DerivativeOperators::get_d1_vector(Tensor<2, Real, SpaceDim> &d1,
                                         const FArrayBox &a_vars_box,
                                         const Interval &a_interval)
 {
-    // get the derivs
+    // get the derivs for each component
     Tensor<1, Real, SpaceDim> d1_comp1, d1_comp2, d1_comp3;
     get_d1(d1_comp1, a_iv, a_vars_box, a_interval.begin());
     get_d1(d1_comp2, a_iv, a_vars_box, a_interval.begin() + 1);
@@ -88,7 +93,7 @@ void DerivativeOperators::get_d2_vector(Tensor<3, Real, SpaceDim> &d2,
                                         const FArrayBox &a_vars_box,
                                         const Interval &a_interval)
 {
-    // get the derivs
+    // get the derivs for each component
     Tensor<2, Real, SpaceDim> d2_comp1, d2_comp2, d2_comp3;
     get_d2(d2_comp1, a_iv, a_vars_box, a_interval.begin());
     get_d2(d2_comp2, a_iv, a_vars_box, a_interval.begin() + 1);
@@ -115,7 +120,7 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
         iv_offset1[idir] -= 1;
         iv_offset2[idir] += 1;
 
-        // 2nd order stencil for now
+        // 2nd order stencil
         Real d2comp_dxdx = 1.0 / (m_dx[idir] * m_dx[idir]) *
                            (1.0 * a_vars_box(iv_offset2, a_comp) -
                             2.0 * a_vars_box(a_iv, a_comp) +
@@ -136,10 +141,4 @@ void DerivativeOperators::vector_Laplacian(Tensor<1, Real, SpaceDim> &laplacian,
     laplacian[0] = laplacian1;
     laplacian[1] = laplacian2;
     laplacian[2] = laplacian3;
-
-    /*
-    scalar_Laplacian(laplacian[0], a_iv, a_vars_box, a_interval.begin());
-    scalar_Laplacian(laplacian[1], a_iv, a_vars_box, a_interval.begin()+1);
-    scalar_Laplacian(laplacian[2], a_iv, a_vars_box, a_interval.end());
-    */
 }

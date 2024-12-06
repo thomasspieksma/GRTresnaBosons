@@ -3,18 +3,18 @@
  * Please refer to LICENSE in GRTresna's root directory.
  */
 
-#ifndef USERVARIABLES_HPP
-#define USERVARIABLES_HPP
+#ifndef MULTIGRIDVARIABLES_HPP
+#define MULTIGRIDVARIABLES_HPP
 
-#include "CoreVariables.hpp"
-#include "ScalarFieldUserVariables.hpp"
+#include "MetricVariables.hpp"
+#include "ScalarFieldVariables.hpp"
 
-namespace MultigridUserVariables
+namespace MultigridVariables
 {
 static const std::array<std::string, NUM_METRIC_VARS> metric_variable_names =
     MetricVariables::variable_names;
 static const std::array<std::string, NUM_MULTIGRID_VARS - NUM_METRIC_VARS>
     matter_variable_names = MatterVariables::variable_names;
-} // namespace MultigridUserVariables
+} // namespace MultigridVariables
 
-#endif /* USERVARIABLES_HPP */
+#endif /* MULTIGRIDVARIABLES_HPP */

@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #include "Grids.hpp"
 
 #include "AMRIO.H"
@@ -171,13 +176,13 @@ void Grids::define_operator(MultilevelLinearOp<FArrayBox> &mlOp,
 }
 
 void Grids::update_psi0(Vector<LevelData<FArrayBox> *> multigrid_vars,
-                        Vector<LevelData<FArrayBox> *> dpsi,
+                        Vector<LevelData<FArrayBox> *> constraint_vars,
                         bool deactivate_zero_mode)
 {
     for (int ilev = 0; ilev < m_grid_params.numLevels; ilev++)
     {
         IntVect ghosts = m_grid_params.num_ghosts * IntVect::Unit;
-        // For interlevel ghosts in dpsi
+        // For interlevel ghosts in constraint_vars
         if (ilev > 0)
         {
             // Fill using 4th order method which fills corner ghosts
@@ -186,14 +191,9 @@ void Grids::update_psi0(Vector<LevelData<FArrayBox> *> multigrid_vars,
             m_patcher.define(grids_data[ilev], grids_data[ilev - 1],
                              NUM_CONSTRAINT_VARS, vectDomain[ilev - 1],
                              m_grid_params.refRatio[ilev], num_ghosts);
-            m_patcher.coarseFineInterp(*dpsi[ilev], *dpsi[ilev - 1], 0, 0,
+            m_patcher.coarseFineInterp(*constraint_vars[ilev],
+                                       *constraint_vars[ilev - 1], 0, 0,
                                        NUM_CONSTRAINT_VARS);
-            // QuadCFInterp quadCFI(grids_data[ilev], &grids_data[ilev - 1],
-            //                         vectDx[ilev][0],
-            //                         m_grid_params.refRatio[ilev],
-            //                         NUM_CONSTRAINT_VARS, vectDomain[ilev]);
-            // quadCFI.coarseFineInterp(*dpsi[ilev],
-            //                             *dpsi[ilev - 1]);
         }
 
         // For intralevel ghosts - this is done below
@@ -210,15 +210,16 @@ void Grids::update_psi0(Vector<LevelData<FArrayBox> *> multigrid_vars,
 
         // now the update
 
-        // first exchange ghost cells for dpsi so they are filled with the
-        // correct values
-        dpsi[ilev]->exchange(dpsi[ilev]->interval(), exchange_copier);
+        // first exchange ghost cells for constraint_vars so they are filled
+        // with the correct values
+        constraint_vars[ilev]->exchange(constraint_vars[ilev]->interval(),
+                                        exchange_copier);
 
         DataIterator dit = multigrid_vars[ilev]->dataIterator();
         for (dit.begin(); dit.ok(); ++dit)
         {
             FArrayBox &multigrid_vars_box = (*multigrid_vars[ilev])[dit()];
-            FArrayBox &dpsi_box = (*dpsi[ilev])[dit()];
+            FArrayBox &constraint_vars_box = (*constraint_vars[ilev])[dit()];
 
             Box ghosted_box = multigrid_vars_box.box();
             BoxIterator bit(ghosted_box);
@@ -227,20 +228,29 @@ void Grids::update_psi0(Vector<LevelData<FArrayBox> *> multigrid_vars,
                 IntVect iv = bit();
 
                 // Update constraint variables for the linear step
-                multigrid_vars_box(iv, c_psi_reg) += dpsi_box(iv, c_psi);
+                multigrid_vars_box(iv, c_psi_reg) +=
+                    constraint_vars_box(iv, c_psi);
                 if (deactivate_zero_mode)
                 {
-                    multigrid_vars_box(iv, c_V1_0) += dpsi_box(iv, c_V1);
-                    multigrid_vars_box(iv, c_V2_0) += dpsi_box(iv, c_V2);
-                    multigrid_vars_box(iv, c_V3_0) += dpsi_box(iv, c_V3);
-                    multigrid_vars_box(iv, c_U_0) += dpsi_box(iv, c_U);
+                    multigrid_vars_box(iv, c_V1_0) +=
+                        constraint_vars_box(iv, c_V1);
+                    multigrid_vars_box(iv, c_V2_0) +=
+                        constraint_vars_box(iv, c_V2);
+                    multigrid_vars_box(iv, c_V3_0) +=
+                        constraint_vars_box(iv, c_V3);
+                    multigrid_vars_box(iv, c_U_0) +=
+                        constraint_vars_box(iv, c_U);
                 }
                 else
                 {
-                    multigrid_vars_box(iv, c_V1_0) = dpsi_box(iv, c_V1);
-                    multigrid_vars_box(iv, c_V2_0) = dpsi_box(iv, c_V2);
-                    multigrid_vars_box(iv, c_V3_0) = dpsi_box(iv, c_V3);
-                    multigrid_vars_box(iv, c_U_0) = dpsi_box(iv, c_U);
+                    multigrid_vars_box(iv, c_V1_0) =
+                        constraint_vars_box(iv, c_V1);
+                    multigrid_vars_box(iv, c_V2_0) =
+                        constraint_vars_box(iv, c_V2);
+                    multigrid_vars_box(iv, c_V3_0) =
+                        constraint_vars_box(iv, c_V3);
+                    multigrid_vars_box(iv, c_U_0) =
+                        constraint_vars_box(iv, c_U);
                 }
             }
         }
@@ -278,15 +288,6 @@ void Grids::fill_ghosts_correct_coarse(
         // Fill the interlevel ghosts from a coarser level
         if (ilev > 0)
         {
-            // Fill using 4th order method which fills corner ghosts too
-            // int num_ghosts = 1;
-            // FourthOrderCFInterp m_patcher;
-            // m_patcher.define(grids_data[ilev], grids_data[ilev - 1],
-            //                     NUM_MULTIGRID_VARS, vectDomain[ilev - 1],
-            //                     m_grid_params.refRatio[ilev], num_ghosts);
-            // m_patcher.coarseFineInterp(*multigrid_vars[ilev],
-            //                             *multigrid_vars[ilev - 1], 0, 0,
-            //                             NUM_MULTIGRID_VARS);
             QuadCFInterp quadCFI(grids_data[ilev], &grids_data[ilev - 1],
                                  vectDx[ilev][0], m_grid_params.refRatio[ilev],
                                  NUM_MULTIGRID_VARS, vectDomain[ilev]);
@@ -356,24 +357,10 @@ void Grids::set_grids()
             RealVect dxLevel = vectDx[level];
 
             LevelData<FArrayBox> *temp_multigrid_vars;
-            // LevelData<FArrayBox> *temp_dpsi;
 
-            // KC TODO: Make this an input
             IntVect ghosts = 1 * IntVect::Unit;
             temp_multigrid_vars = new LevelData<FArrayBox>(
                 grids_data[level], NUM_MULTIGRID_VARS, ghosts);
-            // temp_dpsi = new LevelData<FArrayBox>(grids_data[level],
-            //                                      NUM_CONSTRAINT_VARS,
-            //                                      ghosts);
-
-            // NEED TO UNCOMMENT THIS - NOT MUCH WILL HAPPEN OTHERWISE :D
-
-            /*
-            set_initial_conditions(*temp_multigrid_vars, *temp_dpsi, dxLevel,
-                                   m_grid_params, true);
-            */
-            // set condition for regrid - use the integrability condition
-            // integral
 
             tagging_criterion->set_regrid_condition(
                 *vect_tagging_criterion[level], *temp_multigrid_vars, dxLevel,
@@ -384,13 +371,6 @@ void Grids::set_grids()
                 delete temp_multigrid_vars;
                 temp_multigrid_vars = NULL;
             }
-            /*
-            if (temp_dpsi != NULL)
-            {
-                delete temp_dpsi;
-                temp_dpsi = NULL;
-            }
-            */
         }
         Vector<IntVectSet> tagVect(topLevel + 1);
         int tags_grow = 2;
@@ -424,7 +404,6 @@ void Grids::set_grids()
         {
             moreLevels = true;
         }
-        // doesn't break anything but redundant I think?
         else
         {
             break;
@@ -476,8 +455,6 @@ void Grids::set_tag_cells(
         DisjointBoxLayout level_domain = level_tagging_criterion.getBoxes();
         DataIterator dit = level_tagging_criterion.dataIterator();
 
-        // KC: this seems an odd way to refine - would expect threshold to
-        // decrease with higher levels. It seems to work ok so leave it for now.
         Real max_tagging_criterion = 0;
         max_tagging_criterion = norm(level_tagging_criterion,
                                      level_tagging_criterion.interval(), 0);

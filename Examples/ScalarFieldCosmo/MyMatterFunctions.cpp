@@ -1,7 +1,7 @@
-/* GRTresna                                                                          
-* Copyright 2024 The GRTL collaboration.
-* Please refer to LICENSE in GRTresna's root directory.
-*/
+/* GRTresna
+ * Copyright 2024 The GRTL collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
 
 #include "ScalarField.hpp"
 

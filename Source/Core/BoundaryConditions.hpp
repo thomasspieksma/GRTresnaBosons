@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef BOUNDARYCONDITIONS_HPP_
 #define BOUNDARYCONDITIONS_HPP_
 
@@ -9,11 +14,12 @@
 #include "RealVect.H"
 
 // Our includes
+#include "ConstraintVariables.hpp"
 #include "DimensionDefinitions.hpp"
-#include "GRChomboUserVariables.hpp"
+#include "GRChomboVariables.hpp"
 #include "GRParmParse.hpp"
 #include "LevelData.H"
-#include "MultigridUserVariables.hpp"
+#include "MultigridVariables.hpp"
 #include "VariableType.hpp"
 
 // Chombo namespace
@@ -91,9 +97,6 @@ class BoundaryConditions
     static void write_boundary_conditions(const params_t &a_params);
 
     /// The function which returns the parity of each of the vars in
-    /// UserVariables.hpp The parity should be defined in the params file, and
-    /// will be output to the pout files for checking at start/restart of
-    /// simulation (It is only required for reflective boundary conditions.)
     int
     get_var_parity(int a_comp, int a_dir,
                    const VariableType var_type = VariableType::multigrid) const;

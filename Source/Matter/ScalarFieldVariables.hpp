@@ -1,7 +1,12 @@
-#ifndef SCALARFIELDUSERVARIABLES_HPP_
-#define SCALARFIELDUSERVARIABLES_HPP_
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
 
-#include "CoreVariables.hpp"
+#ifndef SCALARFIELDVARIABLES_HPP_
+#define SCALARFIELDVARIABLES_HPP_
+
+#include "MetricVariables.hpp"
 
 // Matter Vars
 enum
@@ -22,4 +27,4 @@ static constexpr std::array<int, NUM_MULTIGRID_VARS - NUM_METRIC_VARS> const
 
 } // namespace MatterVariables
 
-#endif // SCALARFIELDUSERVARIABLES_HPP_
+#endif // SCALARFIELDVARIABLES_HPP_

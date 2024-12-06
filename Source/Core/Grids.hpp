@@ -1,12 +1,16 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef GRIDS_HPP_
 #define GRIDS_HPP_
-
-#include "IntVect.H"
 
 #include "BoundaryConditions.hpp"
 #include "CoarseAverage.H"
 #include "FilesystemTools.hpp"
 #include "GRParmParse.hpp"
+#include "IntVect.H"
 #include "IntVectSet.H"
 #include "MultilevelLinearOp.H"
 #include "ProblemDomain.H"
@@ -75,7 +79,7 @@ class Grids
                                bool filling_solver_vars);
 
     void update_psi0(Vector<LevelData<FArrayBox> *> multigrid_vars,
-                     Vector<LevelData<FArrayBox> *> dpsi,
+                     Vector<LevelData<FArrayBox> *> constraint_vars,
                      bool deactivate_zero_mode);
 
     params_t m_grid_params;
@@ -118,10 +122,6 @@ class Grids
                        Vector<IntVectSet> &tagVect, Vector<RealVect> &vectDx,
                        Vector<ProblemDomain> &vectDomain, const int tags_grow,
                        const int baseLevel, int numLevels_tag);
-
-    // void set_regrid_condition(LevelData<FArrayBox> &a_condition,
-    //                       LevelData<FArrayBox> &a_multigrid_vars,
-    //                       const RealVect &a_dx);
 };
 
 #endif /* GRIDS_HPP_ */

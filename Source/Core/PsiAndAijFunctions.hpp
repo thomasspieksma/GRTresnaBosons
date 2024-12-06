@@ -1,14 +1,18 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef PSIANDAIJFUNCTIONS_HPP_
 #define PSIANDAIJFUNCTIONS_HPP_
 
+#include "DerivativeOperators.hpp"
+#include "FArrayBox.H"
 #include "GRParmParse.hpp"
+#include "Interval.H"
 #include "REAL.H"
 #include "RealVect.H"
 #include "TensorAlgebra.hpp"
-
-#include "DerivativeOperators.hpp"
-#include "FArrayBox.H"
-#include "Interval.H"
 #include "UsingNamespace.H"
 
 class PsiAndAijFunctions
@@ -27,11 +31,10 @@ class PsiAndAijFunctions
         bool use_compact_Vi_ansatz;
     };
 
-    static void read_params(GRParmParse &pp,
-                            params_t &a_psi_and_Aij_functions_params);
+    static void read_params(GRParmParse &pp, params_t &a_psi_and_Aij_params);
 
-    explicit PsiAndAijFunctions(params_t a_psi_and_Aij_functions_params)
-        : m_psi_and_Aij_functions_params(a_psi_and_Aij_functions_params)
+    explicit PsiAndAijFunctions(params_t a_psi_and_Aij_params)
+        : m_psi_and_Aij_params(a_psi_and_Aij_params)
     {
     }
 
@@ -47,7 +50,7 @@ class PsiAndAijFunctions
                          const FArrayBox &multigrid_vars_box, const IntVect &iv,
                          const RealVect &a_dx, const RealVect &loc) const;
 
-    params_t m_psi_and_Aij_functions_params;
+    params_t m_psi_and_Aij_params;
 };
 
 #endif /* PSIANDAIJFUNCTIONS_HPP_ */

@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef RHSTAGGING_HPP_
 #define RHSTAGGING_HPP_
 
@@ -32,8 +37,6 @@ class RHSTagging : public TaggingCriterion
     matter_t const *matter;
 
     const Real G_Newton;
-
-    // Vector<LevelData<FArrayBox> *> *vect_tagging_criterion;
 };
 
 template <typename method_t, typename matter_t>

@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef CTTK_HPP_
 #error "This file should only be included through CTTK.hpp"
 #endif
@@ -204,7 +209,6 @@ void CTTK<matter_t>::set_elliptic_terms(
                 (2.0 / 3.0 * d1_K[2] + 8.0 * M_PI * G_Newton * emtensor.Si[2]);
 
             // Periodic: Use ansatz B.3 in B&S (p547)
-            // JCA TODO: We are not using this U when constructing Aij
             // Non-periodic: Compact ansatz B.7 in B&S (p547)
             if (!m_method_params.use_compact_Vi_ansatz)
             {

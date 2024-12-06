@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef FILESYSTEMTOOLS_HPP_
 #define FILESYSTEMTOOLS_HPP_
 
