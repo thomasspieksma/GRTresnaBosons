@@ -33,6 +33,7 @@ BoundaryConditions::params_t::params_t()
     vars_parity_grchombo = GRChomboVariables::vars_parity;
     vars_parity_constraint = ConstraintVariables::vars_parity;
     extrapolation_order = 1;
+    Vi_extrapolated_at_boundary = false;
 }
 
 void BoundaryConditions::params_t::set_is_periodic(
@@ -102,6 +103,8 @@ void BoundaryConditions::params_t::read_params(GRParmParse &pp)
     pp.load("lo_boundary", loBoundary, lo_boundary);
     if (pp.contains("lo_boundary"))
         set_lo_boundary(loBoundary);
+
+    pp.load("Vi_extrapolated_at_boundary", Vi_extrapolated_at_boundary, false);
 
     if (extrapolating_boundaries_exist)
     {
@@ -353,18 +356,22 @@ void BoundaryConditions::fill_constraint_box(const Side::LoHiSide a_side,
                 // simplest case - boundary values are extrapolated
                 case EXTRAPOLATING_BC:
                 {
-                    // zero for dpsi
+                    // zero for psi
                     fill_constant_cell(a_state, iv, a_side, idir, psi_comps,
                                        0.0);
 
-                    // TODO: Check if reinstating this improves solver?
-                    // const extrapolating for V_i (means Aij = 0)
-                    // int extrapolation_order = 0;
-                    // fill_extrapolating_cell(a_state, iv, a_side, idir,
-                    //                        Vi_comps, extrapolation_order);
+                    if (m_params.Vi_extrapolated_at_boundary)
+                    {
+                        int extrapolation_order = 0;
+                        fill_extrapolating_cell(a_state, iv, a_side, idir,
+                                                Vi_comps, extrapolation_order);
+                    }
+                    else
+                    {
 
-                    fill_constant_cell(a_state, iv, a_side, idir, Vi_comps,
-                                       0.0);
+                        fill_constant_cell(a_state, iv, a_side, idir, Vi_comps,
+                                           0.0);
+                    }
                     break;
                 }
                 // Enforce a reflective symmetry in some direction
@@ -435,14 +442,17 @@ void BoundaryConditions::fill_boundary_cells_dir(
                     fill_constant_cell(out_box, iv, a_side, dir, psi_comps,
                                        1.0);
 
-                    // TODO: Again check if this changes things
-                    // and if not remove
-                    // int extrapolation_order = 0;
-                    // fill_extrapolating_cell(out_box, iv, a_side, dir,
-                    // Vi_comps,
-                    //                        extrapolation_order);
-
-                    fill_constant_cell(out_box, iv, a_side, dir, Vi_comps, 0.0);
+                    if (m_params.Vi_extrapolated_at_boundary)
+                    {
+                        int extrapolation_order = 0;
+                        fill_extrapolating_cell(out_box, iv, a_side, dir,
+                                                Vi_comps, extrapolation_order);
+                    }
+                    else
+                    {
+                        fill_constant_cell(out_box, iv, a_side, dir, Vi_comps,
+                                           0.0);
+                    }
                 }
                 else
                 {
