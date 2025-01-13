@@ -20,11 +20,7 @@ class RHSTagging : public TaggingCriterion
     {
     }
 
-    ~RHSTagging()
-    {
-        delete method;
-        delete matter;
-    }
+    ~RHSTagging() {}
 
     void set_regrid_condition(LevelData<FArrayBox> &a_condition,
                               LevelData<FArrayBox> &a_multigrid_vars,
