@@ -252,6 +252,9 @@ GRSolver<method_t, matter_t>::~GRSolver()
     delete grids;
     delete psi_and_Aij_functions;
     delete diagnostics;
+    delete tagging_criterion;
+    delete method;
+    delete matter;
 
     for (int ilev = 0; ilev < numLevels; ilev++)
     {
