@@ -9,7 +9,7 @@ Furthermore, it makes use of the Chombo library for adaptive mesh refinement
 to allow automatic increasing of the grid resolution in regions
 of arbitrary shape and topology.
 
-Please visit www.grchombo.org for the full list of developers and their
+Please visit www.grtlcollaboration.org for the full list of developers and their
 institutions.
 
 ## Getting started
