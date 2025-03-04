@@ -33,7 +33,7 @@ error_filename = Ham_and_Mom_errors
 
 # 'N' is the number of subdivisions in each direction of a cubic box
 # 'L' is the length of the longest side of the box, dx_coarsest = L/N
-N = 64 64 64
+N = 128 128 64
 L = 128
 
 # Maximum number of times you can regrid above coarsest level
