@@ -21,7 +21,7 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 
     const double spacing = 0.01; // in r for the values
 
-    // // Interpolate data from read in values
+    // Interpolate data from read in values
     const int indxL = static_cast<int>(floor(rr / spacing));
     const int indxH = static_cast<int>(ceil(rr / spacing));
 
@@ -49,10 +49,8 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 
     double phi_ang_real = real(phi_ang);
 
-    double phi_tot = phi * phi_ang_real * cos(varphi);
+    double phi_tot = phi * phi_ang_real * cos(m_SH * varphi);
     
-    // double phi_tot = exp(-rr);// exp(-rr);
-
     // std::cout << "Interpolated phi: " << phi_tot << std::endl;
 
     return phi_tot;
@@ -61,9 +59,10 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 
 Real ScalarField::my_Pi_function(const RealVect &loc) const
 {
-    //Real rr = sqrt(loc[0] * loc[0] + (loc[1] - m_matter_params.offset_scalar) * (loc[1] - m_matter_params.offset_scalar) + loc[2] * loc[2]);
+    
+    int m_SH = 1;
 
     double varphi = atan2(loc[1] - m_matter_params.offset_scalar, loc[0]);
 
-    return sin(varphi);
+    return sin(m_SH * varphi);
 }

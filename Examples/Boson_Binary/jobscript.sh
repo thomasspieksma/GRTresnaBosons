@@ -4,8 +4,8 @@
 #SBATCH -p astro2_short
 
 #SBATCH --nodes 8
-#SBATCH --ntasks-per-node=24
-#SBATCH --cpus-per-task=2
+#SBATCH --ntasks-per-node=12
+#SBATCH --cpus-per-task=4
 # Output files
 #SBATCH -o std_output.txt
 #SBATCH -e std_error.txt
@@ -13,4 +13,4 @@
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # Run the program
-srun ./Main_ScalarFieldBH3d.Linux.64.mpicxx.gfortran.OPT.MPI.ex params.txt
+srun ./Main_ScalarFieldBH3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI.ex params.txt

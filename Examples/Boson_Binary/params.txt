@@ -34,10 +34,10 @@ error_filename = Ham_and_Mom_errors
 # 'N' is the number of subdivisions in each direction of a cubic box
 # 'L' is the length of the longest side of the box, dx_coarsest = L/N
 N = 64 64 32
-L = 128
+L = 256
 
 # Maximum number of times you can regrid above coarsest level
-max_level = 5 # There are (max_level+1) grids, so min is zero
+max_level = 8 # There are (max_level+1) grids, so min is zero
 
 # Threshold for AMR refinement, based on magnitude of rhs
 # refine_threshold = 0.5
@@ -90,12 +90,6 @@ G_Newton = 1.0
 
 # Scalar field input params read in MatterParams.hpp
 # and used in MatterFunctions.hpp
-phi_0 = 0.0
-dphi = 1e-1
-dphi_length = 5.0
-pi_0 = 0.0
-dpi = 1e-1
-dpi_length = 5.0
 scalar_mass = 0.2
 spheroidicity_param = -0.000196353
 offset_scalar = 6.10679
