@@ -10,6 +10,7 @@
 #SBATCH -o std_output.txt
 #SBATCH -e std_error.txt
 #SBATCH -D ./
+#SBATCH --exclusive
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # Run the program

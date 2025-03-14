@@ -19,7 +19,7 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 {
     Real rr = sqrt(loc[0] * loc[0] + (loc[1] - m_matter_params.offset_scalar) * (loc[1] - m_matter_params.offset_scalar) + loc[2] * loc[2]);
 
-    const double spacing = 0.01; // in r for the values
+    const double spacing = 0.1; // in r for the values
 
     // Interpolate data from read in values
     const int indxL = static_cast<int>(floor(rr / spacing));
