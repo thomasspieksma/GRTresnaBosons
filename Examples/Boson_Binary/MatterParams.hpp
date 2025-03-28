@@ -27,12 +27,12 @@ inline void read_params(GRParmParse &pp, params_t &matter_params)
     pp.get("spheroidicity_param", matter_params.spheroidicity_param);
     pp.get("offset_scalar", matter_params.offset_scalar);
     
-    #define NUMRAD 2000
+    #define NUMRAD 12500
     static Real inputdPhi[NUMRAD];
     
     std::array<double, 1> tmp = {0.0};
 
-    std::string phi_file("radial_profile_alpha02_short.csv");
+    std::string phi_file("radial_profile_alpha02_12k_c.csv");
 
     ifstream ifs0(phi_file);
 

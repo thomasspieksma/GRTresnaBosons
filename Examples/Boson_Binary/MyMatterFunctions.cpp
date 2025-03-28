@@ -19,7 +19,7 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 {
     Real rr = sqrt(loc[0] * loc[0] + (loc[1] - m_matter_params.offset_scalar) * (loc[1] - m_matter_params.offset_scalar) + loc[2] * loc[2]);
 
-    const double spacing = 0.1; // in r for the values
+    const double spacing = 0.04; // in r for the values
 
     // Interpolate data from read in values
     const int indxL = static_cast<int>(floor(rr / spacing));
@@ -43,13 +43,13 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
     complex<double> nom_gamm_sq = i * 2.0 * sqrt(6) * spin_Y_2Plusl_m;
     complex<double> denom_gamm_sq = i * 50.0 * sqrt(21);
     
-    complex<double> phi_ang = spin_Y_l_m+ m_matter_params.spheroidicity_param * nom_gamm_sq / denom_gamm_sq;
+    complex<double> phi_ang = spin_Y_l_m + m_matter_params.spheroidicity_param * nom_gamm_sq / denom_gamm_sq;
 
-    double varphi = atan2(loc[1] - m_matter_params.offset_scalar, loc[0]);
+    // double varphi = atan2(loc[1] - m_matter_params.offset_scalar, loc[0]);
 
     double phi_ang_real = real(phi_ang);
 
-    double phi_tot = phi * phi_ang_real * cos(m_SH * varphi);
+    double phi_tot = 0.1 * phi * phi_ang_real;// * cos(m_SH * varphi);
     
     // std::cout << "Interpolated phi: " << phi_tot << std::endl;
 
@@ -60,9 +60,39 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 Real ScalarField::my_Pi_function(const RealVect &loc) const
 {
     
+    Real rr = sqrt(loc[0] * loc[0] + (loc[1] - m_matter_params.offset_scalar) * (loc[1] - m_matter_params.offset_scalar) + loc[2] * loc[2]);
+
+    const double spacing = 0.04; // in r for the values
+
+    // Interpolate data from read in values
+    const int indxL = static_cast<int>(floor(rr / spacing));
+    const int indxH = static_cast<int>(ceil(rr / spacing));
+
+    // the field values
+    double phi =
+    m_matter_params.dPhi[indxL] +
+        (rr / spacing - indxL) * (m_matter_params.dPhi[indxH] - m_matter_params.dPhi[indxL]);
+
+    int ell_SH = 1;
     int m_SH = 1;
+    int s_SH = 0;
 
-    double varphi = atan2(loc[1] - m_matter_params.offset_scalar, loc[0]);
+    SphericalHarmonics::Y_lm_t<double> spi_Y_2Plusl_m = SphericalHarmonics::spin_Y_lm(loc[0], (loc[1] - m_matter_params.offset_scalar), loc[2], s_SH, 2.0 + ell_SH, m_SH);
+    SphericalHarmonics::Y_lm_t<double> spi_Y_l_m = SphericalHarmonics::spin_Y_lm(loc[0], (loc[1] - m_matter_params.offset_scalar), loc[2], s_SH, ell_SH, m_SH);
 
-    return sin(m_SH * varphi);
+    const complex<double> i(0.0,1.0);
+    complex<double> spin_Y_2Plusl_m = spi_Y_2Plusl_m.Real + i * spi_Y_2Plusl_m.Im;
+    complex<double> spin_Y_l_m = spi_Y_l_m.Real + i * spi_Y_l_m.Im;
+    complex<double> nom_gamm_sq = i * 2.0 * sqrt(6) * spin_Y_2Plusl_m;
+    complex<double> denom_gamm_sq = i * 50.0 * sqrt(21);
+    
+    complex<double> phi_ang = spin_Y_l_m + m_matter_params.spheroidicity_param * nom_gamm_sq / denom_gamm_sq;
+
+    // double varphi = atan2(loc[1] - m_matter_params.offset_scalar, loc[0]);
+
+    double phi_ang_imag = imag(phi_ang);
+
+    double phi_tot = 0.1 * phi * phi_ang_imag;
+
+    return -m_matter_params.scalar_mass * phi_tot;//sin(m_SH * varphi);
 }

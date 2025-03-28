@@ -1,7 +1,7 @@
 #!/bin/sh                                                  
 #SBATCH -J Scalar_BH_2                    # job name                  
-#SBATCH -t 6:00:00                      # walltime (dd:hh:mm:ss)    
-#SBATCH -p astro2_short
+#SBATCH -t 1:00:00                      # walltime (dd:hh:mm:ss)    
+#SBATCH -p astro2_devel
 
 #SBATCH --nodes 8
 #SBATCH --ntasks-per-node=12
@@ -15,3 +15,4 @@
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # Run the program
 srun ./Main_ScalarFieldBH3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI.ex params.txt
+
